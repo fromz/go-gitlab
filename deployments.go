@@ -30,17 +30,27 @@ type DeploymentsService struct {
 	client *Client
 }
 
+// ListCommitsOptions represents the available ListCommits() options.
+//
+// GitLab API docs: https://docs.gitlab.com/ce/api/commits.html#list-repository-commits
+type ListDeploymentsOptions struct {
+	ListOptions
+	OrderBy *string `url:"order_by,omitempty" json:"order_by,omitempty"`
+	Sort    *string `url:"sort,omitempty" json:"sort,omitempty"`
+	Search  *string `url:"search,omitempty" json:"search,omitempty"`
+}
+
 // ListDeployments gets a list of repository commits in a project.
 //
 // GitLab API docs: https://docs.gitlab.com/ce/api/commits.html#list-commits
-func (s *DeploymentsService) ListDeployments(pid interface{}, options ...OptionFunc) ([]*Deployment, *Response, error) {
+func (s *DeploymentsService) ListDeployments(pid interface{}, opt ListDeploymentsOptions, options ...OptionFunc) ([]*Deployment, *Response, error) {
 	project, err := parseID(pid)
 	if err != nil {
 		return nil, nil, err
 	}
 	u := fmt.Sprintf("projects/%s/deployments", url.QueryEscape(project))
 
-	req, err := s.client.NewRequest("GET", u, nil, options)
+	req, err := s.client.NewRequest("GET", u, opt, options)
 	if err != nil {
 		return nil, nil, err
 	}
